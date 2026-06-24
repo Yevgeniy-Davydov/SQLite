@@ -148,5 +148,106 @@ SELECT * FROM Kunde; -- zeigt ALLES aus Tabelle Kunde
 SELECT * FROM Kunde LIMIT 3; -- zeigt nur 3 Einträge aus Tabelle Kunde
 SELECT * FROM Kunde LIMIT 15; -- zeigt 15 Einträge aus Tabelle Kunde, bzw alle, weil wir 12 Einträgen haben
 
+---------------------------------------------------------------------------------------------------------------
+
+--UPDATE : Datensätze aktualisieren
+
+UPDATE Kunde -- Tabellen Name
+SET Strasse = 'Bahnhofstrasse 8', PLZ = '79114', Ort = 'Freiburg' -- ist umgezogen, andere Adresse mit SET
+WHERE Kunde_ID = 3; -- bei ID 3 mit WHERE angegeben
+
+-- mit ID 1
+UPDATE Kunde
+SET Straße = 'Nurnbergerstrasse 42', PLZ = '90433', Ort = 'Nurnberg' WHERE Kundennummer = 1;
+
+-- mit ID 2 mit neuem nachnamen
+UPDATE Kunde
+SET Nachname = 'Meier' WHERE Kundennummer = 2; -- Nachname ändern bei Kunde mit ID 2
+
+---------------------------------------------------------------------------------------------------------------
+
+-- DELETE : Datensätze löschen
+
+DELETE FROM Kunde WHERE Kunde_ID = 12;
+SELECT * FROM Kunde;
+
+DELETE FROM Kunde WHERE Kunde_ID = 1; -- Wenn man bei ID 1 löscht, rücken die IDs nicht nach!! ID sind fest
+SELECT * FROM Kunde;
+
+-- Löschung in der Kreuztabelle
+-- hier soll man alle Nummern löschen, damit der Eintag verschwindet
+DELETE FROM Bestellung_Artikel 
+WHERE Bestellung_ID = 1 AND Artikel_ID = 1; -- hier mit AND, weil beide sollen TRUE sein
+
+---------------------------------------------------------------------------------------------------------------
+
+
+-- GROUP BY : Daten Gruppieren
+-- hier greift eine Tabelle auf die Einträge der anderen Tabelle
+
+
+-- Wieviel Artikel gibt es pro Artikelgruppe?
+
+SELECT Artikelgruppe_ID AS 'Artikelgruppe', COUNT(*) AS 'Anzahl der Artikel'    -- Primärschlüssel der ersten Tabelle
+FROM Artikel                                                                    -- Adresse der zweiten Tabelle
+GROUP BY Artikelgruppe_ID;                                                      -- Primärschlüssel der ersten Tabelle
+
+
+
+-- Wieviele Bestelluneg hat jeder Kunde aufgegeben?
+SELECT Kunde_ID, COUNT(*) AS 'Anzhal der Bestellungen'
+FROM Bestellung
+GROUP BY Kunde_ID;
+
+---------------------------------------------------------------------------------------------------------------
+
+-- HAVING - Filter auf Gruppen (nicht WHERE)
+-- Unterschied: WHERE vs HAVING
+-- WHERE - benutz man wenn man einzelne Zeilen filter != Gruppierungen
+
+-- HAVING funktioniert nur auf GROUP BY Kombinationen
+SELECT Artikelgruppe_ID, COUNT(*) as 'Anzahl der Artikel'
+FROM Artikel
+GROUP BY Artikelgruppe_ID 
+HAVING COUNT(*) > 1; -- mit HAVING filtert man nach der Gruppierung und bezieht sich auf GROUP BY
+
+---------------------------------------------------------------------------------------------------------------
+
+
+-- JOIN : Tabellen miteinander verbinden und als TAbelle ausgeben - nur eine ANSICHT nichts neues erstellt. 
+-- Damit wir Daten Tabellenübergreifend sehen wollen
+
+-- wie wollen Bestellung mit Kundenname sehen
+-- TAbelle Kunde + attribute: sein Vorname sein Nachname; Tabelle bestellung + attribute: Bestellnummer, Bestelldatum;
+-- Woher, Adresse der zweiten Tabelle
+
+SELECT Kunde.Vorname, Kunde.Nachname, Bestellung.Bestellung_ID, Bestellung.Bestelldatum     -- bestimmung der zu sehenden Attribute
+FROM Bestellung    -- Tabelle mit n-seite                                                   -- bestimmung der Tabelle            
+JOIN Kunde         --Tabelle mit 1-Kardinalität                                             -- bestimmung der Tabelle die hinzugefugt werden soll
+ON Bestellung.Kunde_ID= Kunde.Kunde_ID;                                                     -- Referenz angaben Frendschlüssel = Primärschlüssel
+
+
+-- JOIN mit Tabellen Artikelgruppe und Artikel
+
+SELECT Artikelgruppe.Bezeichnung, Artikelgruppe.Rabatt, Artikel.Bezeichnung, Artikel.Preis
+FROM Artikel
+JOIN Artikelgruppe
+ON Artikel.Artikelgruppe_ID = Artikelgruppe.Artikelgruppe_ID;
+
+--Variation mit AS und Artikel-ID
+SELECT Artikelgruppe.Bezeichnung AS 'Artikelgruppen-Bezeichnung', Artikelgruppe.Rabatt, 
+Artikel.Bezeichnung AS 'Artikel-Bezeichnung', Artikel.Preis, Artikel.Artikel_ID AS 'Artikelnummer'
+FROM Artikel
+JOIN Artikelgruppe
+ON Artikel.Artikelgruppe_ID = Artikelgruppe.Artikelgruppe_ID;
+
+---------------------------------JOIN mit der Kreuztabelle-------------------------------------------------------
+--1.wir nehmen die äussere Attribute: aus tabellen Bestellung und Artikel
+
+SELECT Bestellung.Bestelldatum, Artikel.Bezeichnung, Artikel.Preis
+FROM Bestellung_Artikel -- hier dei Kreuztabelle angeben, sie is in der Mitte
+JOIN Bestellung ON Bestellung_Artikel.Bestellung_ID = Bestellung.Bestellung_ID
+JOIN Artikel ON Bestellung_Artikel.Artikel_ID = Artikel.Artikel_ID;
+
 
 
